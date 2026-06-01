@@ -1,0 +1,53 @@
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
+
+export default defineConfig({
+  base: '/simple-numbersums/',
+  plugins: [
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Simple Number Sums',
+        short_name: 'Number Sums',
+        description: 'Number Sums logic puzzles with regions and four difficulty levels',
+        theme_color: '#1a1a2e',
+        background_color: '#1a1a2e',
+        display: 'standalone',
+        orientation: 'any',
+        start_url: '/simple-numbersums/',
+        scope: '/simple-numbersums/',
+        icons: [
+          {
+            src: 'icons/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'icons/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        globIgnores: ['**/puzzles/**'],
+        navigateFallback: '/simple-numbersums/index.html',
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) =>
+              url.pathname.includes('/puzzles/') && url.pathname.endsWith('.json'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'puzzle-banks',
+              expiration: {
+                maxEntries: 4,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ],
+});

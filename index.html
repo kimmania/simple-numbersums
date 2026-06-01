@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Number Sums" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta
+      name="description"
+      content="Number Sums logic puzzles with regions, circle and erase modes, undo, and four difficulty levels."
+    />
+    <title>Simple Number Sums</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="header">
+        <h1 class="title">Number Sums</h1>
+        <div class="header-actions">
+          <button type="button" id="help" class="btn btn-help" aria-haspopup="dialog">
+            Help
+          </button>
+          <span id="puzzle-id" class="puzzle-id" aria-live="polite"></span>
+        </div>
+      </header>
+
+      <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+        <form method="dialog" class="help-form">
+          <header class="help-header">
+            <h2 id="help-title">How to play</h2>
+            <button type="submit" class="help-close" aria-label="Close help">×</button>
+          </header>
+          <div class="help-body">
+            <section>
+              <h3>Goal</h3>
+              <p>
+                Each puzzle shows numbers in a grid with colored <strong>regions</strong>.
+                Choose which numbers count toward the puzzle by circling them. The numbers you
+                circle in each <strong>row</strong>, <strong>column</strong>, and
+                <strong>region</strong> must add up to that line’s target.
+              </p>
+            </section>
+            <section>
+              <h3>Targets</h3>
+              <ul>
+                <li><strong>Rows</strong> — totals on the left</li>
+                <li><strong>Columns</strong> — totals on top</li>
+                <li><strong>Regions</strong> — totals on the small badge in each colored area</li>
+              </ul>
+              <p>
+                A target turns <strong>green</strong> when your circled numbers in that row,
+                column, or region add up correctly. You can still be wrong overall, so check every
+                line before you finish.
+              </p>
+            </section>
+            <section>
+              <h3>Circle and Erase</h3>
+              <ul>
+                <li>
+                  <strong>Circle</strong> — tap a cell to mark its number as included (circled).
+                  Tap again to clear the mark.
+                </li>
+                <li>
+                  <strong>Erase</strong> — tap to mark a number as excluded (crossed out). Tap again
+                  to clear.
+                </li>
+              </ul>
+              <p>Pick the mode with the buttons below the board. Keyboard shortcuts: <kbd>C</kbd> for Circle, <kbd>E</kbd> for Erase.</p>
+            </section>
+            <section>
+              <h3>Controls</h3>
+              <ul>
+                <li><strong>New Game</strong> — random puzzle at the selected difficulty</li>
+                <li><strong>Reset</strong> — clear your marks on the current puzzle</li>
+                <li><strong>Undo</strong> — reverse your last mark (or ⌘/Ctrl+Z)</li>
+                <li>
+                  <strong>Difficulty</strong> — Easy through Expert; larger grids are harder
+                </li>
+              </ul>
+            </section>
+            <section>
+              <h3>Winning</h3>
+              <p>
+                You solve the puzzle when every cell is marked included or excluded, and every row,
+                column, and region sum matches its target.
+              </p>
+            </section>
+          </div>
+          <footer class="help-footer">
+            <button type="submit" class="btn btn-primary help-done">Got it</button>
+          </footer>
+        </form>
+      </dialog>
+
+      <section class="controls" aria-label="Game controls">
+        <label class="difficulty-label">
+          <span class="sr-only">Difficulty</span>
+          <select id="difficulty" class="difficulty-select">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+            <option value="expert">Expert</option>
+          </select>
+        </label>
+        <button type="button" id="reset" class="btn">Reset</button>
+        <button type="button" id="undo" class="btn" disabled>Undo</button>
+        <button type="button" id="new-game" class="btn btn-primary">New Game</button>
+      </section>
+
+      <div id="win-banner" class="win-banner hidden" role="status">Puzzle complete!</div>
+
+      <main class="game-area">
+        <div id="board" class="board-host" aria-label="Number Sums board"></div>
+
+        <aside class="sidebar" aria-label="Input modes">
+          <p class="mode-hint">
+            Circle included numbers so each row, column, and region matches its target.
+          </p>
+          <div class="mode-row" role="group" aria-label="Circle or erase mode">
+            <button type="button" id="mode-circle" class="btn btn-toggle active" aria-pressed="true">
+              Circle
+            </button>
+            <button type="button" id="mode-erase" class="btn btn-toggle" aria-pressed="false">
+              Erase
+            </button>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="footer">
+        <span id="puzzle-id-footer" class="puzzle-id"></span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

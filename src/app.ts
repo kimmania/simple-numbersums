@@ -126,7 +126,7 @@ export class NumberSumsApp {
     if (!this.state || this.state.status === 'won') return;
 
     const target = event.target as HTMLElement;
-    if (target.tagName === 'SELECT' || target.tagName === 'BUTTON') return;
+    if (target.tagName === 'SELECT') return;
 
     if ((event.metaKey || event.ctrlKey) && event.key === 'z') {
       event.preventDefault();
@@ -175,6 +175,7 @@ export class NumberSumsApp {
 
     event.preventDefault();
     this.state.selected = index;
+    this.board.cells[index]?.focus({ preventScroll: true });
     this.refresh();
   }
 

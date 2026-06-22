@@ -49,6 +49,9 @@ export function createBoard(container: HTMLElement): BoardElements {
   wrapper.className = 'board-wrapper';
   container.appendChild(wrapper);
 
+  wrapper.setAttribute('role', 'application');
+  wrapper.setAttribute('aria-label', 'Number Sums board');
+
   return { wrapper, cells: [], colClues: [], rowClues: [], regionBadges: [], puzzleId: null };
 }
 
@@ -92,6 +95,7 @@ function buildBoard(board: BoardElements, state: GameState): void {
     for (let c = 0; c < cols; c++) {
       const index = r * cols + c;
       const cell = document.createElement('button');
+      cell.id = `cell-${index}`;
       cell.type = 'button';
       cell.className = 'cell';
       cell.dataset.index = String(index);

@@ -38,12 +38,12 @@ export default defineConfig({
           {
             urlPattern: ({ url }) =>
               url.pathname.includes('/puzzles/') && url.pathname.endsWith('.json'),
-            handler: 'CacheFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'puzzle-banks',
               expiration: {
                 maxEntries: 4,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
             },
           },

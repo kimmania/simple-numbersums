@@ -26,6 +26,10 @@ const REGION_PALETTE = [
 export type BoardElements = {
   wrapper: HTMLElement;
   cells: HTMLElement[];
+  colClues: HTMLElement[];
+  rowClues: HTMLElement[];
+  regionBadges: HTMLElement[];
+  puzzleId: string | null;
 };
 
 /** Top-leftmost cell in a region — where the target badge is shown. */
@@ -45,15 +49,20 @@ export function createBoard(container: HTMLElement): BoardElements {
   wrapper.className = 'board-wrapper';
   container.appendChild(wrapper);
 
-  return { wrapper, cells: [] };
+  return { wrapper, cells: [], colClues: [], rowClues: [], regionBadges: [], puzzleId: null };
 }
 
-export function renderBoard(board: BoardElements, state: GameState): void {
+function buildBoard(board: BoardElements, state: GameState): void {
   const { puzzle, marks, selected } = state;
   const { rows, cols, values, rowTargets, colTargets, regionIds } = puzzle;
 
   board.wrapper.innerHTML = '';
   board.cells = [];
+  board.colClues = [];
+  board.rowClues = [];
+  board.regionBadges = [];
+  board.puzzleId = puzzle.id;
+
   board.wrapper.style.setProperty('--cols', String(cols));
   board.wrapper.style.setProperty('--rows', String(rows));
 
@@ -68,6 +77,7 @@ export function renderBoard(board: BoardElements, state: GameState): void {
     clue.dataset.col = String(c);
     clue.classList.toggle('clue-satisfied', isColSatisfied(puzzle, marks, c));
     board.wrapper.appendChild(clue);
+    board.colClues[c] = clue;
   }
 
   for (let r = 0; r < rows; r++) {
@@ -77,6 +87,7 @@ export function renderBoard(board: BoardElements, state: GameState): void {
     rowClue.dataset.row = String(r);
     rowClue.classList.toggle('clue-satisfied', isRowSatisfied(puzzle, marks, r));
     board.wrapper.appendChild(rowClue);
+    board.rowClues[r] = rowClue;
 
     for (let c = 0; c < cols; c++) {
       const index = r * cols + c;
@@ -123,6 +134,7 @@ export function renderBoard(board: BoardElements, state: GameState): void {
       if (valueEl) anchorCell.insertBefore(badge, valueEl);
       else anchorCell.appendChild(badge);
       anchorCell.classList.add('has-region-target');
+      board.regionBadges[ri] = badge;
     }
 
     if (satisfied) {
@@ -130,6 +142,51 @@ export function renderBoard(board: BoardElements, state: GameState): void {
         board.cells[idx]?.classList.add('region-satisfied');
       }
     }
+  }
+}
+
+function updateBoard(board: BoardElements, state: GameState): void {
+  const { puzzle, marks, selected } = state;
+  const { rows, cols } = puzzle;
+
+  for (let c = 0; c < cols; c++) {
+    board.colClues[c].classList.toggle('clue-satisfied', isColSatisfied(puzzle, marks, c));
+  }
+
+  for (let r = 0; r < rows; r++) {
+    board.rowClues[r].classList.toggle('clue-satisfied', isRowSatisfied(puzzle, marks, r));
+  }
+
+  for (let i = 0; i < board.cells.length; i++) {
+    const cell = board.cells[i];
+    cell.classList.toggle('selected', selected === i);
+    cell.classList.toggle('included', marks[i] === 'included');
+    cell.classList.toggle('excluded', marks[i] === 'excluded');
+  }
+
+  for (let ri = 0; ri < puzzle.regions.length; ri++) {
+    const region = puzzle.regions[ri];
+    const satisfied = isRegionSatisfied(puzzle, marks, ri);
+
+    const badge = board.regionBadges[ri];
+    if (badge) {
+      badge.classList.toggle('clue-satisfied', satisfied);
+    }
+
+    for (const idx of region.cells) {
+      board.cells[idx]?.classList.toggle('region-satisfied', satisfied);
+    }
+  }
+}
+
+export function renderBoard(board: BoardElements, state: GameState): void {
+  const { rows, cols, id } = state.puzzle;
+  const expectedCells = rows * cols;
+
+  if (board.cells.length !== expectedCells || board.puzzleId !== id) {
+    buildBoard(board, state);
+  } else {
+    updateBoard(board, state);
   }
 }
 

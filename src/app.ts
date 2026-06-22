@@ -19,7 +19,8 @@ export class NumberSumsApp {
   private state: GameState | null = null;
   private board = createBoard(document.getElementById('board')!);
   private loading = false;
-  private undoStack: HistorySnapshot[] = [];
+  private undoSnapshot: HistorySnapshot | null = null;
+  private saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
   async init(): Promise<void> {
     initHelp();
@@ -73,20 +74,20 @@ export class NumberSumsApp {
   }
 
   private clearUndo(): void {
-    this.undoStack = [];
+    this.undoSnapshot = null;
     setUndoEnabled(false);
   }
 
   private recordUndoPoint(): void {
     if (!this.state || this.state.status === 'won') return;
-    this.undoStack = [captureSnapshot(this.state)];
+    this.undoSnapshot = captureSnapshot(this.state);
   }
 
   private setMode(mode: GameState['inputMode']): void {
     if (!this.state) return;
     this.state.inputMode = mode;
     setInputMode(mode);
-    saveGame(this.state);
+    this.debouncedSaveGame();
   }
 
   private handleCellClick(index: number): void {
@@ -115,9 +116,9 @@ export class NumberSumsApp {
   }
 
   private handleUndo(): void {
-    if (!this.state || this.undoStack.length === 0) return;
-    const snapshot = this.undoStack.pop()!;
-    applySnapshot(this.state, snapshot);
+    if (!this.state || !this.undoSnapshot) return;
+    applySnapshot(this.state, this.undoSnapshot);
+    this.undoSnapshot = null;
     this.refresh();
   }
 
@@ -139,6 +140,11 @@ export class NumberSumsApp {
     }
     if (event.key === 'e' || event.key === 'E') {
       this.setMode('erase');
+      return;
+    }
+    if (event.key === 'n' || event.key === 'N') {
+      event.preventDefault();
+      void this.newGame();
       return;
     }
 
@@ -172,17 +178,26 @@ export class NumberSumsApp {
     this.refresh();
   }
 
+  private debouncedSaveGame(): void {
+    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(() => {
+      if (this.state && this.state.status === 'playing') {
+        saveGame(this.state);
+      }
+    }, 250);
+  }
+
   private refresh(): void {
     if (!this.state) return;
 
     renderBoard(this.board, this.state);
     updatePuzzleId(this.state.puzzle.id);
     setInputMode(this.state.inputMode);
-    setUndoEnabled(this.undoStack.length > 0);
+    setUndoEnabled(this.undoSnapshot !== null);
     showWinBanner(this.state.status === 'won');
 
     if (this.state.status === 'playing') {
-      saveGame(this.state);
+      this.debouncedSaveGame();
     } else {
       clearSavedGame();
     }

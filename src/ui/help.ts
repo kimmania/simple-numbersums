@@ -8,6 +8,4 @@ export function initHelp(): void {
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close();
   });
-
-  dialog.addEventListener('cancel', () => dialog.close());
 }

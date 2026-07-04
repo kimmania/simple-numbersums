@@ -56,8 +56,6 @@ export function isRegionSatisfied(
 }
 
 export function isComplete(puzzle: PuzzleRecord, marks: CellMark[]): boolean {
-  if (marks.some((m) => m === 'unknown')) return false;
-
   for (let r = 0; r < puzzle.rows; r++) {
     if (!isRowSatisfied(puzzle, marks, r)) return false;
   }
